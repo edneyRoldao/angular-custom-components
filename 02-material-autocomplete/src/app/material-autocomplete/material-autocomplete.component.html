@@ -1,0 +1,17 @@
+<mat-form-field>
+    <div class="d-flex flex-row">
+        <input type="text"
+               [placeholder]="options?.placeholder"
+               aria-label="selected"
+               matInput
+               [formControl]="autocompleteControl"
+               [matAutocomplete]="autocompleteTemplate">
+        <ng-content select="i"></ng-content>
+    </div>
+
+    <mat-autocomplete #autocompleteTemplate="matAutocomplete" [displayWith]="displayFn.bind(this)">
+        <mat-option *ngFor="let item of filteredOptions | async" [value]="item">
+            {{ item[options?.displayField] }}
+        </mat-option>
+    </mat-autocomplete>
+</mat-form-field>
