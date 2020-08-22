@@ -1,0 +1,51 @@
+<mat-card>
+    <mat-card-title>Quinzena Filter</mat-card-title>
+    <mat-card-content>
+        <div class="row row-center">
+            <form #form="ngForm" class="row row-center">
+                <div class="col-3">
+                    <mat-form-field class="field-custom">
+                        <mat-label>Mês</mat-label>
+                        <mat-select [(ngModel)]="quinzenaFilter.month" name="selectedMesFiltro">
+                            <mat-option *ngFor="let month of months" [value]="month">
+                                {{ month }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="ano col-3">
+                    <mat-form-field class="field-custom">
+                        <mat-label>Ano</mat-label>
+                        <mat-select [(ngModel)]="quinzenaFilter.year" name="selectedAnoFiltro">
+                            <mat-option *ngFor=" let year of years" [value]="year">
+                                {{ year }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="quinzena col-3">
+                    <mat-radio-group color="primary" [(ngModel)]="quinzenaFilter.quinzena" name="quinzena">
+                        <div class="row mt-2">
+                            <div class="col ">
+                                <mat-radio-button [value]="1">Primeira quinzena</mat-radio-button>
+                            </div>
+                            <div class="segunda col ">
+                                <mat-radio-button [value]="2" class="ml-3">Segunda quinzena</mat-radio-button>
+                            </div>
+                        </div>
+                    </mat-radio-group>
+                </div>
+                <div class="pesquisa col-2">
+                    <button mat-raised-button
+                            type="submit"
+                            class="next"
+                            [disabled]="!quinzenaFilter.month || !quinzenaFilter.year"
+                            (click)="search()">
+                        PESQUISAR
+                        <i class="material-icons">search</i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </mat-card-content>
+</mat-card>
