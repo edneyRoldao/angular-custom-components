@@ -1,27 +1,15 @@
-import {Injectable} from "@angular/core";
-import {Animal} from "./animal.model";
-import {Observable, of} from "rxjs/index";
+import {Injectable} from '@angular/core';
+import {Animal} from './animal.model';
+import {Observable} from 'rxjs';
+import {HttpClient} from '@angular/common/http';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class AppService {
 
-    getAnimals(filterValue?: string, filterField?: string): Observable<Animal[]> {
-        if (filterField && filterValue) {
-            const filteredList = LIST.filter((animal: Animal) => {
-                return animal[filterField].toLowerCase().includes(filterValue.toLowerCase())
-            });
+    constructor(private http: HttpClient) {}
 
-            return of(filteredList);
-        }
-
-        return of(LIST);
+    getAnimals(filterValue = '', filterField = ''): Observable<Animal[]> {
+        return this.http.get<Animal[]>(`http://localhost:3030/animais?field=${filterField}&value=${filterValue}`);
     }
-}
 
-const LIST: Animal[] = [
-    { name: 'draco', lastName: 'Potter'},
-    { name: 'Thor', lastName: 'Asgard'},
-    { name: 'Iron', lastName: 'Man'},
-    { name: 'Doctor', lastName: 'Strange'},
-    { name: 'Spider', lastName: 'Man'}
-];
+}

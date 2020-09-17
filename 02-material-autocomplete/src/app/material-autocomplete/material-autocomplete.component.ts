@@ -1,12 +1,12 @@
 import { Component, OnInit, ViewChild, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatAutocomplete } from '@angular/material';
-import { Observable, Subject } from 'rxjs';
-import { startWith, map, tap, switchMap } from 'rxjs/operators';
-import { MaterialAutocompleteModel } from "./material-autocomplete.interface";
+import {Observable, of, Subject} from 'rxjs';
+import { startWith, map, tap, switchMap, debounceTime } from 'rxjs/operators';
+import { MaterialAutocompleteModel } from './material-autocomplete.interface';
 
 @Component({
-    selector: 'material-autocomplete',
+    selector: 'app-material-autocomplete',
     templateUrl: 'material-autocomplete.component.html',
     styleUrls: [
         'material-autocomplete.component.scss'
@@ -15,35 +15,30 @@ import { MaterialAutocompleteModel } from "./material-autocomplete.interface";
 export class MaterialAutocompleteComponent implements OnInit, OnChanges {
 
     @ViewChild('autocompleteTemplate')
-    protected autocompleteTemplate: MatAutocomplete;
+    autocompleteTemplate: MatAutocomplete;
 
     @Input()
-    protected autocompleteOptions: MaterialAutocompleteModel;
+    autocompleteOptions: MaterialAutocompleteModel;
 
+    items: [];
     onSelectChange: Observable<any>;
+    filteredOptions: Observable<any>;
+    autocompleteControl: FormControl;
     options: MaterialAutocompleteModel;
 
-    private onOptionSelectEmmiter: Subject<any>;
-
-    protected items: [];
-    protected filteredOptions: Observable<any>;
-    protected autocompleteControl: FormControl;
-
+    private _onOptionSelectEmmiter: Subject<any>;
 
     constructor() {
         this.items = [];
-        this.onOptionSelectEmmiter = new Subject();
+        this._onOptionSelectEmmiter = new Subject();
         this.autocompleteControl = new FormControl();
-        this.onSelectChange = this.onOptionSelectEmmiter.asObservable();
+        this.onSelectChange = this._onOptionSelectEmmiter.asObservable();
     }
 
     ngOnInit() {
-        if (this.autocompleteOptions.initialValue) {
-            this.autocompleteControl.setValue(this.autocompleteOptions.initialValue)
-        }
-
-        this.initFilterOptions();
-        this.handleOptionsSelected();
+        this._setupDefaultOptions();
+        this._setupAutocomplete();
+        this._handleOptionsSelected();
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -56,42 +51,56 @@ export class MaterialAutocompleteComponent implements OnInit, OnChanges {
 
     clearInputValue(): void {
         this.autocompleteControl.setValue({});
-        this.onOptionSelectEmmiter.next({});
+        this._onOptionSelectEmmiter.next({});
     }
 
-    protected displayFn(displayValue?: any): string | undefined {
+    displayFn(displayValue?: any): string | undefined {
         return displayValue ? displayValue[this.options.displayField] : undefined;
     }
 
-    private initFilterOptions(): void {
+    private _setupAutocomplete(): void {
         this.filteredOptions = this.autocompleteControl.valueChanges.pipe(
             startWith<string | any>(''),
-            map(value => typeof value === 'string' ? value : value[this.options.filterValue]),
+            map(value => typeof value === 'string' ? value : value[this.options.filterFieldName]),
             tap((filterValue: string) => {
                 if (!filterValue) {
-                    this.onOptionSelectEmmiter.next({});
+                    this._onOptionSelectEmmiter.next({});
                 }
             }),
-            switchMap(searchType => this.options.filterValue ? this.filter(searchType) : this.items.slice()),
+            debounceTime(this.options.debounceTime),
+            switchMap(searchType => this.options.filterFieldName ? this._filter(searchType) : this.items.slice()),
             tap((list: any[]) => {
                 if (!list.length) {
-                    this.onOptionSelectEmmiter.next({});
+                    this._onOptionSelectEmmiter.next({});
                 }
             })
         );
     }
 
-    private filter(field: string): Observable<any[]> {
+    private _filter(searchValue: string): Observable<any[]> {
+        if (!searchValue && this.autocompleteOptions.notCallServiceWhenEmpty) {
+            return of([]);
+        }
+
         const service = this.options.source.service;
         const method = this.options.source.methodName;
-        return service[method](field, this.options.filterValue);
+        return service[method](searchValue, this.options.filterFieldName);
     }
 
-    private handleOptionsSelected() {
+    private _handleOptionsSelected() {
         this.autocompleteTemplate.optionSelected.pipe(
             map(selected => selected.option.value),
-            map(value => this.onOptionSelectEmmiter.next(value))
+            map(value => this._onOptionSelectEmmiter.next(value))
         ).subscribe();
+    }
+
+    private _setupDefaultOptions() {
+        if (this.autocompleteOptions.initialValue) {
+            this.autocompleteControl.setValue(this.autocompleteOptions.initialValue);
+        }
+
+        this.autocompleteOptions.debounceTime = !!this.autocompleteOptions.debounceTime ? this.autocompleteOptions.debounceTime : 500;
+        this.autocompleteOptions.appearance = !!this.autocompleteOptions.appearance ? this.autocompleteOptions.appearance : 'outline';
     }
 
 }

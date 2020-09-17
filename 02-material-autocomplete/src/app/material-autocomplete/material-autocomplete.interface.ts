@@ -1,7 +1,12 @@
+import {debounceTime} from 'rxjs/operators';
+
 export interface MaterialAutocompleteModel {
-    initialValue?: any;
-    placeholder: string;
-    filterValue: string;
+    filterFieldName: string;
     displayField: string;
     source: { service: any, methodName: string };
+    initialValue?: any;
+    placeholder?: string;
+    debounceTime?: number;
+    notCallServiceWhenEmpty?: boolean;
+    appearance?: 'outline' | 'legacy' | 'standard' | 'fill';
 }

@@ -1,7 +1,7 @@
-<mat-form-field>
+<mat-form-field [appearance]="options.appearance">
     <div class="d-flex flex-row">
         <input type="text"
-               [placeholder]="options?.placeholder"
+               [placeholder]="options.placeholder"
                aria-label="selected"
                matInput
                [formControl]="autocompleteControl"

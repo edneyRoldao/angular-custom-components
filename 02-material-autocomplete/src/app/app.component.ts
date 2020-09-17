@@ -1,17 +1,16 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {MaterialAutocompleteComponent} from "./material-autocomplete/material-autocomplete.component";
-import {MaterialAutocompleteModel} from "./material-autocomplete/material-autocomplete.interface";
-import {AppService} from "./app.service";
-import {Animal} from "./animal.model";
+import {MaterialAutocompleteComponent} from './material-autocomplete/material-autocomplete.component';
+import {MaterialAutocompleteModel} from './material-autocomplete/material-autocomplete.interface';
+import {AppService} from './app.service';
+import {Animal} from './animal.model';
 
 @Component({
-    selector: 'root',
-    template: `
-
+    selector: 'app-root',
+    template: `            
         <form #form="ngForm">
             <div class="container mt-5">
                 <h4> Autocomplete showcase </h4>
-                <material-autocomplete #materialAutocomplete [autocompleteOptions]="options"></material-autocomplete>
+                <app-material-autocomplete #materialAutocomplete [autocompleteOptions]="options"></app-material-autocomplete>
                 <button class="ml-4" mat-fab color="primary" (click)="cleanSelectedValue()"> CLEAN </button>
                 
                 <div class="d-flex flex-row mt-5">
@@ -39,7 +38,7 @@ export class AppComponent implements OnInit {
         this.options = {
             displayField: 'name',
             placeholder: 'animal name',
-            filterValue: 'name',
+            filterFieldName: 'name',
             source: {
                 service: this.appService,
                 methodName: 'getAnimals'
@@ -54,6 +53,5 @@ export class AppComponent implements OnInit {
     cleanSelectedValue() {
         this.materialAutocomplete.clearInputValue();
     }
-
 
 }
